@@ -1,6 +1,15 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import { provideHttpClient, HttpClient } from '@angular/common/http';
+import { appConfig } from './app/app.config';
+import { inject } from '@angular/core';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [provideHttpClient(), appConfig],
+}).then(() => {
+  const http = inject(HttpClient);
+  http.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true }).subscribe({
+    next: () => console.log('CSRF cookie set ✔️'),
+    error: (err) => console.error('CSRF init failed ❌', err)
+  });
+});
